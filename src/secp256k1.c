@@ -361,14 +361,13 @@ int secp256k1_ecdsa_sign(const secp256k1_context* ctx, secp256k1_ecdsa_signature
     if (!overflow && !secp256k1_scalar_is_zero(&sec)) {
         unsigned int count = 0;
         secp256k1_scalar_set_b32(&msg, msg32, NULL);
-        while (1) {
-            unsigned char nonce32[32];
+        unsigned char nonce32[32];
+        while (1) {            
             ret = noncefp(nonce32, msg32, seckey, NULL, (void*)noncedata, count);
             if (!ret) {
                 break;
             }
             secp256k1_scalar_set_b32(&non, nonce32, &overflow);
-            memset(nonce32, 0, 32);
             if (!overflow && !secp256k1_scalar_is_zero(&non)) {
                 if (secp256k1_ecdsa_sig_sign(&ctx->ecmult_gen_ctx, &r, &s, &sec, &msg, &non, NULL)) {
                     break;
@@ -376,6 +375,7 @@ int secp256k1_ecdsa_sign(const secp256k1_context* ctx, secp256k1_ecdsa_signature
             }
             count++;
         }
+        memset(nonce32, 0, 32);
         secp256k1_scalar_clear(&msg);
         secp256k1_scalar_clear(&non);
         secp256k1_scalar_clear(&sec);
